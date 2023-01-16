@@ -10,10 +10,11 @@
 
 import React, {useState, useEffect} from 'react';
 import {Button, StyleSheet, Text, TextInput, View} from 'react-native';
+import axios from 'axios';
 
 const App = () => {
   const signUpTemplate = {
-    name: {value: '',error: ''},
+    name: {value: '', error: ''},
     email: {value: '', error: ''},
     password: {value: '', error: ''},
     confirm: {value: '', error: ''},
@@ -24,12 +25,11 @@ const App = () => {
 
   const handleFormError = (key, value) => {
     let error = '';
-    if(key === 'name'){
-      if(value.length < 3){
-        error = 'Name must be atleast 3 characters'
+    if (key === 'name') {
+      if (value.length < 3) {
+        error = 'Name must be atleast 3 characters';
       }
-    }
-    else if (key === 'email') {
+    } else if (key === 'email') {
       if (value.length === 0) {
         error = 'Email Address must not be blank';
       } else if (!/^([\w-\.])+@([\w-])+\.([\w-]{2,4})$/g.test(value)) {
@@ -85,10 +85,23 @@ const App = () => {
     return data;
   };
 
-  const handleSubmit = () => {
+  const postUserData = async data => {
+    try {
+      const res = await axios.post('http://localhost:3000/users', data, {
+        headers: { 'Content-Type': 'application/json', 'x-auth-token': 'true007' }
+      });
+      return res;
+    } catch (err) {
+      return err;
+    }
+  };
+
+  const handleSubmit = async () => {
     console.log('handle submit', signupForm);
     const data = extractFormData();
     console.log('Extract form data', data);
+    const response = await postUserData(data);
+    console.log('response', response);
   };
 
   useEffect(() => {
@@ -99,7 +112,7 @@ const App = () => {
     <View style={styles.container}>
       <View style={styles.formContainer}>
         <Text style={styles.heading}>Sign Up</Text>
-        
+
         <TextInput
           style={styles.input}
           placeholder="Name"
@@ -126,7 +139,7 @@ const App = () => {
           onChangeText={text => handleForm('password', text)}
           value={signupForm.password.value}
         />
-        {signupForm.email.error && (
+        {signupForm.password.error && (
           <Text style={styles.error}>{signupForm.password.error}</Text>
         )}
 

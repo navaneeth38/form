@@ -9,7 +9,15 @@
  */
 
 import React, {useState, useEffect} from 'react';
-import {Button, StyleSheet, Text, TextInput, View} from 'react-native';
+import {
+  Button,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import axios from 'axios';
 
 const App = () => {
@@ -22,6 +30,7 @@ const App = () => {
   };
 
   const [signupForm, setsignupForm] = useState({...signUpTemplate});
+  const [loading, setLoading] = useState(false);
 
   const handleFormError = (key, value) => {
     let error = '';
@@ -88,7 +97,10 @@ const App = () => {
   const postUserData = async data => {
     try {
       const res = await axios.post('http://localhost:3000/users', data, {
-        headers: { 'Content-Type': 'application/json', 'x-auth-token': 'true007' }
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': 'true007',
+        },
       });
       return res;
     } catch (err) {
@@ -100,74 +112,96 @@ const App = () => {
     console.log('handle submit', signupForm);
     const data = extractFormData();
     console.log('Extract form data', data);
-    const response = await postUserData(data);
-    console.log('response', response);
+    setLoading(true);
+    try {
+      const response = await postUserData(data);
+      if (response.status === 200) {
+        setLoading(false);
+        Alert.alert('Success', 'User created succesfully');
+      } else {
+        setLoading(false);
+        Alert.alert('Failed', )
+      }
+    } 
+    catch(err){
+      setLoading(false)
+      Alert.alert("failed")
+    }
   };
 
   useEffect(() => {
-    console.log(signupForm);
+    console.log(loading);
   }, [signupForm]);
 
+  const newLocal = "#0000";
   return (
     <View style={styles.container}>
-      <View style={styles.formContainer}>
-        <Text style={styles.heading}>Sign Up</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Name"
-          onChangeText={text => handleForm('name', text)}
-          value={signupForm.name.value}
+      {loading ? (
+        <ActivityIndicator
+          size={'large'}
+          color={'black'}
+          style={{marginVertical: 70, marginHorizontal: 20}}
         />
-        {signupForm.name.error && (
-          <Text style={styles.error}>{signupForm.name.error}</Text>
-        )}
+      ) : (
+        <View style={styles.formContainer}>
+          <Text style={styles.heading}>Sign Up</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          onChangeText={text => handleForm('email', text)}
-          value={signupForm.email.value}
-        />
-        {signupForm.email.error && (
-          <Text style={styles.error}>{signupForm.email.error}</Text>
-        )}
-        <TextInput
-          secureTextEntry={true}
-          style={styles.input}
-          placeholder="Password"
-          onChangeText={text => handleForm('password', text)}
-          value={signupForm.password.value}
-        />
-        {signupForm.password.error && (
-          <Text style={styles.error}>{signupForm.password.error}</Text>
-        )}
+          <TextInput
+            style={styles.input}
+            placeholder="Name"
+            onChangeText={text => handleForm('name', text)}
+            value={signupForm.name.value}
+          />
+          {signupForm.name.error && (
+            <Text style={styles.error}>{signupForm.name.error}</Text>
+          )}
 
-        <TextInput
-          secureTextEntry={true}
-          style={styles.input}
-          placeholder="Confirm Password"
-          onChangeText={text => handleForm('confirm', text)}
-          value={signupForm.confirm.value}
-        />
-        {signupForm.confirm.error && (
-          <Text style={styles.error}>{signupForm.confirm.error}</Text>
-        )}
-        <TextInput
-          style={styles.input}
-          placeholder="Phone"
-          onChangeText={text => handleForm('phone', text)}
-          value={signupForm.phone.value}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            onChangeText={text => handleForm('email', text)}
+            value={signupForm.email.value}
+          />
+          {signupForm.email.error && (
+            <Text style={styles.error}>{signupForm.email.error}</Text>
+          )}
+          <TextInput
+            secureTextEntry={true}
+            style={styles.input}
+            placeholder="Password"
+            onChangeText={text => handleForm('password', text)}
+            value={signupForm.password.value}
+          />
+          {signupForm.password.error && (
+            <Text style={styles.error}>{signupForm.password.error}</Text>
+          )}
 
-        {signupForm.phone.error && (
-          <Text style={styles.error}>{signupForm.phone.error}</Text>
-        )}
+          <TextInput
+            secureTextEntry={true}
+            style={styles.input}
+            placeholder="Confirm Password"
+            onChangeText={text => handleForm('confirm', text)}
+            value={signupForm.confirm.value}
+          />
+          {signupForm.confirm.error && (
+            <Text style={styles.error}>{signupForm.confirm.error}</Text>
+          )}
+          <TextInput
+            style={styles.input}
+            placeholder="Phone"
+            onChangeText={text => handleForm('phone', text)}
+            value={signupForm.phone.value}
+          />
 
-        <View style={styles.btnContainer}>
-          <Button onPress={handleSubmit} title="Submit" />
+          {signupForm.phone.error && (
+            <Text style={styles.error}>{signupForm.phone.error}</Text>
+          )}
+
+          <View style={styles.btnContainer}>
+            <Button onPress={handleSubmit} title="Submit" />
+          </View>
         </View>
-      </View>
+      )}
     </View>
   );
 };
